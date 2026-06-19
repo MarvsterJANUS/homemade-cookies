@@ -10,7 +10,7 @@ let pendingDeleteType = null; // 'order' | 'cookie'
 
 // ── Auth ───────────────────────────────────────────────────
 async function checkAuth() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     showDashboard(session.user.email);
   } else {
@@ -18,7 +18,7 @@ async function checkAuth() {
   }
 }
 
-supabase.auth.onAuthStateChange((_event, session) => {
+supabaseClient.auth.onAuthStateChange((_event, session) => {
   if (session) showDashboard(session.user.email);
   else         showLogin();
 });
@@ -47,7 +47,7 @@ document.getElementById('login-form').addEventListener('submit', async e => {
   btn.disabled        = true;
   btn.textContent     = 'Signing in…';
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   btn.disabled    = false;
   btn.textContent = 'Sign In';
@@ -60,7 +60,7 @@ document.getElementById('login-form').addEventListener('submit', async e => {
 
 // Logout
 document.getElementById('logout-btn').addEventListener('click', async () => {
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
 });
 
 // ── Dashboard Init ─────────────────────────────────────────
@@ -171,7 +171,7 @@ function updateStats() {
 
 // Real-time subscription
 function subscribeToOrders() {
-  supabase.channel('orders-live')
+  supabaseClient.channel('orders-live')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
       allOrders.unshift(payload.new);
       renderOrders();
@@ -278,7 +278,7 @@ document.getElementById('add-cookie-form').addEventListener('submit', async e =>
   btn.disabled    = true;
   btn.textContent = 'Adding…';
 
-  const { error } = await supabase.from('cookies').insert({
+  const { error } = await supabaseClient.from('cookies').insert({
     name,
     description: desc || null,
     emoji,
@@ -319,7 +319,7 @@ document.getElementById('confirm-ok').addEventListener('click', async () => {
   if (!pendingDeleteId) return;
 
   if (pendingDeleteType === 'order') {
-    const { error } = await supabase.from('orders').delete().eq('id', pendingDeleteId);
+    const { error } = await supabaseClient.from('orders').delete().eq('id', pendingDeleteId);
     if (error) { showToast('Could not delete order.', 'error'); return; }
     allOrders = allOrders.filter(o => o.id !== pendingDeleteId);
     renderOrders();
@@ -328,7 +328,7 @@ document.getElementById('confirm-ok').addEventListener('click', async () => {
   }
 
   if (pendingDeleteType === 'cookie') {
-    const { error } = await supabase.from('cookies').delete().eq('id', pendingDeleteId);
+    const { error } = await supabaseClient.from('cookies').delete().eq('id', pendingDeleteId);
     if (error) { showToast('Could not delete cookie.', 'error'); return; }
     showToast('Cookie deleted.', 'info');
     await loadCookiesAdmin();

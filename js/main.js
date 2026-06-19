@@ -14,6 +14,19 @@ const RATING_LABELS = ['', 'Terrible 😬', 'Not great 😕', 'Pretty good 🙂'
 document.addEventListener('DOMContentLoaded', loadCookies);
 
 // ── Load & Render Cookies ──────────────────────────────────
+function showGridError(msg) {
+  const grid = document.getElementById('cookies-grid');
+  grid.innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:60px 20px">
+      <div style="font-size:2.2rem;margin-bottom:14px">😕</div>
+      <p style="color:var(--text-500);margin-bottom:6px">${msg}</p>
+      <p style="color:var(--text-300);font-size:.82rem;margin-bottom:20px">
+        Check the browser console (F12) for details.
+      </p>
+      <button onclick="loadCookies()" class="btn btn-secondary">Try again</button>
+    </div>`;
+}
+
 async function loadCookies() {
   const grid       = document.getElementById('cookies-grid');
   const emptyState = document.getElementById('empty-state');
@@ -21,15 +34,31 @@ async function loadCookies() {
   grid.innerHTML = '<div class="loading-spinner"></div>';
   emptyState.classList.add('hidden');
 
-  const { data: cookies, error } = await supabase
-    .from('cookies')
-    .select('*')
-    .eq('available', true)
-    .order('name');
+  let cookies, cookieError;
+  try {
+    // 10-second timeout so the spinner never hangs forever
+    const timeout = new Promise((_, rej) =>
+      setTimeout(() => rej(new Error('Request timed out after 10 s')), 10000)
+    );
+    const result = await Promise.race([
+      supabaseClient.from('cookies').select('*').eq('available', true).order('name'),
+      timeout,
+    ]);
+    cookies     = result.data;
+    cookieError = result.error;
+  } catch (e) {
+    console.error('loadCookies error:', e);
+    showGridError('Could not reach the database. Check your Supabase URL and key in js/config.js.');
+    return;
+  }
 
-  if (error) {
-    grid.innerHTML = '';
-    showToast('Could not load cookies. Please check your connection.', 'error');
+  if (cookieError) {
+    console.error('Supabase cookies error:', cookieError);
+    showGridError(
+      cookieError.code === '42P01'
+        ? 'Table "cookies" not found — did you run supabase-setup.sql yet?'
+        : 'Could not load cookies: ' + cookieError.message
+    );
     return;
   }
 
@@ -41,7 +70,7 @@ async function loadCookies() {
 
   // Fetch all reviews for the visible cookies in one query
   const cookieIds = cookies.map(c => c.id);
-  const { data: reviews } = await supabase
+  const { data: reviews } = await supabaseClient
     .from('reviews')
     .select('*')
     .in('cookie_id', cookieIds)
@@ -197,7 +226,7 @@ document.getElementById('order-form').addEventListener('submit', async e => {
   btn.disabled    = true;
   btn.textContent = 'Placing order…';
 
-  const { error } = await supabase.from('orders').insert({
+  const { error } = await supabaseClient.from('orders').insert({
     customer_name: name,
     cookie_id:     selectedCookieId,
     cookie_name:   selectedCookieName,
@@ -289,7 +318,7 @@ document.getElementById('review-form').addEventListener('submit', async e => {
   btn.disabled    = true;
   btn.textContent = 'Submitting…';
 
-  const { error } = await supabase.from('reviews').insert({
+  const { error } = await supabaseClient.from('reviews').insert({
     cookie_id:      selectedCookieId,
     reviewer_name:  name,
     rating:         selectedRating,
