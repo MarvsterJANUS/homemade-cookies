@@ -81,7 +81,7 @@ document.querySelectorAll('.tab-btn').forEach(btn =>
 
 // ── Orders ─────────────────────────────────────────────────
 async function loadOrders() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('orders')
     .select('*')
     .order('created_at', { ascending: false });
@@ -142,7 +142,7 @@ function renderOrders() {
 }
 
 async function updateOrderStatus(orderId, status) {
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from('orders')
     .update({ status })
     .eq('id', orderId);
@@ -211,7 +211,7 @@ document.querySelectorAll('.filter-btn').forEach(btn =>
 async function loadCookiesAdmin() {
   const grid = document.getElementById('cookies-manage-grid');
 
-  const { data: cookies, error } = await supabase
+  const { data: cookies, error } = await supabaseClient
     .from('cookies')
     .select('*')
     .order('name');
@@ -255,7 +255,7 @@ async function loadCookiesAdmin() {
 }
 
 async function toggleCookieAvailability(cookieId, currentlyAvailable) {
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from('cookies')
     .update({ available: !currentlyAvailable })
     .eq('id', cookieId);
