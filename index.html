@@ -3,289 +3,520 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cookie Corner 🍪</title>
+  <title>Cookie Corner</title>
   <link rel="stylesheet" href="./css/style.css">
   <style>
-    /* ── Page-specific styles ── */
+  /* ═══════════════════════════════════════
+     PAGE STYLES
+  ═══════════════════════════════════════ */
 
-    /* Header */
-    .site-header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(243, 239, 230, 0.92);
-      backdrop-filter: blur(10px);
-      border-bottom: 1.5px solid var(--border);
-    }
-    .site-header .container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 64px;
-    }
-    .logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--green-700);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .site-nav { display: flex; align-items: center; gap: 6px; }
-    .nav-link {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: var(--text-500);
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      transition: var(--transition);
-    }
-    .nav-link:hover { background: var(--green-50); color: var(--green-700); }
+  /* ── Sticky nav ─────────────────────── */
+  .site-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    transition: background .35s, box-shadow .35s;
+  }
+  .site-header.scrolled {
+    background: rgba(247,243,235,.96);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 1px 24px rgba(11,30,9,.07);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px; max-width: 1160px; margin: 0 auto; padding: 0 36px;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Nunito', sans-serif; font-weight: 800;
+    font-size: 1rem; color: var(--text-on-dark); letter-spacing: .04em;
+    transition: color .3s;
+  }
+  .site-header.scrolled .nav-logo { color: var(--text-900); }
+  .nav-logo-mark {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--green-mid);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .nav-logo-mark svg { width: 16px; height: 16px; fill: #fff; }
+  .nav-links { display: flex; align-items: center; gap: 4px; }
+  .nav-link {
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: .87rem;
+    color: rgba(255,255,255,.65); padding: 8px 14px; border-radius: 999px;
+    transition: all .2s; letter-spacing: .02em;
+  }
+  .nav-link:hover { color: #fff; background: rgba(255,255,255,.1); }
+  .site-header.scrolled .nav-link { color: var(--text-600); }
+  .site-header.scrolled .nav-link:hover { background: var(--green-wash); color: var(--green-dark); }
+  .nav-cta {
+    margin-left: 8px; background: rgba(255,255,255,.12);
+    border: 1.5px solid rgba(255,255,255,.25); color: rgba(255,255,255,.85);
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .87rem;
+    padding: 9px 22px; border-radius: 999px;
+    transition: all .2s; letter-spacing: .03em;
+  }
+  .nav-cta:hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.5); }
+  .site-header.scrolled .nav-cta {
+    background: var(--green-bright); border-color: var(--green-bright); color: #fff;
+  }
+  .site-header.scrolled .nav-cta:hover { background: var(--green-dark); border-color: var(--green-dark); }
+  .nav-admin-btn {
+    width: 36px; height: 36px; border-radius: 50%; margin-left: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.4);
+    transition: color .2s, background .2s;
+    flex-shrink: 0;
+  }
+  .nav-admin-btn:hover { color: rgba(255,255,255,.85); background: rgba(255,255,255,.1); }
+  .nav-admin-btn svg { width: 18px; height: 18px; }
+  .site-header.scrolled .nav-admin-btn { color: var(--text-400); }
+  .site-header.scrolled .nav-admin-btn:hover { color: var(--text-900); background: var(--green-wash); }
 
-    /* Hero */
-    .hero {
-      background: linear-gradient(135deg, var(--bg-dark) 0%, #2c5e1a 60%, #3d7a27 100%);
-      color: var(--white);
-      padding: 80px 0 90px;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(circle at 10% 80%, rgba(141, 196, 122, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 90% 20%, rgba(106, 171, 82, 0.12) 0%, transparent 50%);
-    }
-    .hero .container {
-      position: relative;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 40px;
-      align-items: center;
-    }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(141, 196, 122, 0.22);
-      border: 1px solid rgba(141, 196, 122, 0.4);
-      color: var(--green-200);
-      padding: 5px 14px;
-      border-radius: 999px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: 18px;
-    }
-    .hero h1 { color: var(--white); margin-bottom: 16px; }
-    .hero p  { color: rgba(255,255,255,0.75); font-size: 1.1rem; margin-bottom: 32px; max-width: 480px; }
-    .hero-visual {
-      font-size: 7rem;
-      line-height: 1;
-      filter: drop-shadow(0 4px 24px rgba(0,0,0,0.3));
-      animation: float 4s ease-in-out infinite;
-      user-select: none;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-10px); }
-    }
-    @media (max-width: 640px) {
-      .hero .container { grid-template-columns: 1fr; }
-      .hero-visual { display: none; }
-    }
+  /* ═══════════════════════════════════════
+     HERO — THE MASTERPIECE
+  ═══════════════════════════════════════ */
+  .hero {
+    position: relative;
+    height: 100svh;
+    min-height: 620px;
+    background: radial-gradient(ellipse 75% 85% at 50% 45%, #4d9638 0%, #2a6318 55%, #122608 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-    /* How it works */
-    .how-it-works { padding: 64px 0; background: var(--bg-card); }
-    .how-it-works h2 { text-align: center; margin-bottom: 48px; }
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 32px;
-      text-align: center;
-    }
-    .step-icon {
-      font-size: 2.4rem;
-      margin-bottom: 12px;
-      display: block;
-    }
-    .step h3 { margin-bottom: 6px; color: var(--green-700); }
-    .step p  { font-size: 0.9rem; }
+  /* Background word art — both behind the cookie image */
+  .hero-bg-text {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  .hero-bg-l,
+  .hero-bg-r {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1;
+    white-space: nowrap;
+    text-align: center;
+  }
+  /* "HOMEMADE" — faint, behind the cookie */
+  .hero-bg-l {
+    top: 28%;
+    font-size: clamp(4.5rem, 13vw, 17rem);
+    color: rgba(255,255,255,.08);
+  }
 
-    /* Divider */
-    .leaf-divider {
-      text-align: center;
-      color: var(--green-300);
-      font-size: 1.3rem;
-      letter-spacing: 10px;
-      margin: 4px 0;
-    }
+  /* "Cookies" — in front of the cookie image */
+  .hero-fg-cookies {
+    position: absolute;
+    z-index: 4;
+    bottom: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: -.03em;
+    line-height: 1;
+    white-space: nowrap;
+    font-size: clamp(6rem, 16vw, 21rem);
+    color: #fff;
+    pointer-events: none;
+    user-select: none;
+  }
 
-    /* Cookies section */
-    .cookies-section { padding: 64px 0 80px; }
-    .section-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 40px;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .section-header h2 { margin: 0; }
-    .section-subtitle { color: var(--text-300); font-size: 0.88rem; }
+  /* Decorative small cookies — wrapper rotates, inner img floats */
+  .deco {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .deco img {
+    width: 100%;
+    display: block;
+    filter: drop-shadow(0 6px 18px rgba(0,0,0,.45));
+    animation: floatDeco 8s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes floatDeco {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-13px); }
+  }
 
-    .cookies-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 26px;
-    }
+  .dc-1 { width: 86px; top:  9%; right: 21%; transform: rotate(22deg);   --d: 0s; }
+  .dc-2 { width: 62px; top: 16%; left: 17%;  transform: rotate(-20deg);  --d: 1.4s; opacity:.9; }
+  .dc-3 { width: 70px; bottom: 18%; right: 17%; transform: rotate(34deg); --d: 2.2s; opacity:.85; }
+  .dc-4 { width: 48px; top: 54%; left: 11%;  transform: rotate(-32deg);  --d: 0.8s; opacity:.7; }
+  .dc-5 { width: 58px; bottom: 13%; left: 23%; transform: rotate(14deg); --d: 3.1s; opacity:.65; }
+  .dc-6 { width: 40px; top: 30%; right:  9%; transform: rotate(-14deg);  --d: 1.9s; opacity:.55; }
+  .dc-7 { width: 34px; bottom: 36%; right: 23%; transform: rotate(50deg);--d: 2.7s; opacity:.45; }
+  .dc-8 { width: 28px; top: 70%; left:  7%;  transform: rotate(-42deg);  --d: 0.5s; opacity:.35; }
 
-    .empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 80px 20px;
-      color: var(--text-300);
-    }
-    .empty-state p { font-size: 1.1rem; }
-    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+  /* Main hero cookie — sits in front of everything */
+  .hero-cookie {
+    position: absolute;
+    z-index: 3;
+    width: clamp(260px, 42vw, 540px);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    filter:
+      drop-shadow(0 32px 64px rgba(0,0,0,.55))
+      drop-shadow(0 0 80px rgba(106,181,78,.12));
+    animation: mainFloat 8s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes mainFloat {
+    0%,100% { transform: translate(-50%,-50%) rotate(-1.5deg); }
+    50%      { transform: translate(-50%, calc(-50% - 20px)) rotate(1.5deg); }
+  }
 
-    /* Footer */
-    .site-footer {
-      background: var(--bg-dark);
-      color: rgba(255,255,255,0.55);
-      padding: 28px 0;
-      text-align: center;
-      font-size: 0.88rem;
-    }
-    .site-footer .container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-    }
-    .admin-link {
-      color: rgba(255,255,255,0.35);
-      font-size: 0.78rem;
-      transition: var(--transition);
-    }
-    .admin-link:hover { color: rgba(255,255,255,0.65); }
+  /* Bottom UI row */
+  .hero-bottom {
+    position: absolute;
+    z-index: 10;
+    bottom: 40px; left: 36px; right: 36px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .hero-bottom-left { display: flex; flex-direction: column; gap: 6px; }
+  .hero-small-label {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: .7rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.35);
+  }
+  .hero-tagline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+    color: rgba(255,255,255,.7);
+    line-height: 1.25;
+  }
+  .hero-order-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    color: var(--text-900);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: .9rem;
+    letter-spacing: .04em;
+    padding: 14px 30px;
+    border-radius: 999px;
+    transition: all .25s var(--ease);
+    border: none;
+    white-space: nowrap;
+  }
+  .hero-order-btn:hover {
+    background: var(--green-bright);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(106,181,78,.35);
+  }
+  .hero-order-btn svg {
+    width: 16px; height: 16px;
+    transition: transform .2s var(--ease);
+  }
+  .hero-order-btn:hover svg { transform: translateX(3px); }
 
-    /* Order confirmation overlay */
-    .order-success {
-      text-align: center;
-      padding: 8px 0 4px;
-    }
-    .order-success .success-icon { font-size: 3.5rem; margin-bottom: 12px; }
-    .order-success h2 { color: var(--green-700); margin-bottom: 10px; }
-    .order-success .order-summary {
-      background: var(--green-50);
-      border: 1.5px solid var(--green-200);
-      border-radius: var(--radius-md);
-      padding: 16px;
-      margin: 20px 0;
-      text-align: left;
-    }
-    .order-summary-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.9rem;
-      padding: 4px 0;
-    }
-    .order-summary-row span:first-child { color: var(--text-300); }
-    .order-summary-row span:last-child  { font-weight: 700; color: var(--text-700); }
+  /* Scroll hint */
+  .hero-scroll {
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    bottom: 46px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-line {
+    width: 1px; height: 44px;
+    background: linear-gradient(to bottom, rgba(255,255,255,.4), transparent);
+    animation: scrollPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%,100% { opacity:.4; transform: scaleY(1); }
+    50%      { opacity:.9; transform: scaleY(.6); }
+  }
+  .scroll-label {
+    font-family: 'Nunito', sans-serif;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.3);
+  }
+
+  @media (max-width:768px) {
+    .hero-bg-l        { font-size: clamp(3.5rem,12vw,8rem); }
+    .hero-fg-cookies  { font-size: clamp(4.5rem,14vw,10rem); }
+    .hero-cookie { width: clamp(220px, 70vw, 360px); }
+    .dc-2,.dc-4,.dc-5,.dc-7,.dc-8 { display:none; }
+    .hero-bottom { bottom:28px; left:20px; right:20px; }
+    .hero-scroll { display:none; }
+  }
+
+  /* ─── Marquee ───────────────────────── */
+  .marquee-strip { background:var(--green-mid); padding:14px 0; overflow:hidden; }
+  .marquee-track {
+    display:flex; width:max-content;
+    animation:marquee 26s linear infinite;
+  }
+  .marquee-track:hover { animation-play-state:paused; }
+  .marquee-item {
+    display:flex; align-items:center; gap:24px;
+    padding:0 24px;
+    font-family:'Nunito',sans-serif; font-weight:800;
+    font-size:.75rem; letter-spacing:.16em;
+    text-transform:uppercase; color:rgba(255,255,255,.85); white-space:nowrap;
+  }
+  .msep { color:rgba(255,255,255,.35); font-size:1rem; }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* ─── How it works ──────────────────── */
+  .how-section {
+    background: #fff;
+    padding: 120px 0 140px;
+  }
+  .how-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    color: var(--text-900);
+    line-height: 1.1;
+    margin-bottom: 88px;
+  }
+  .steps-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .step { padding-right: 56px; }
+  .step:not(:first-child) { padding-left: 56px; border-left: 2px solid var(--border); padding-right: 0; }
+  .step:last-child { padding-right: 0; }
+  .step-name {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(2.8rem, 4.5vw, 4.2rem);
+    color: var(--green-mid);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+  .step p {
+    color: var(--text-600);
+    font-size: .95rem;
+    line-height: 1.8;
+  }
+  @media (max-width: 768px) {
+    .steps-row { grid-template-columns: 1fr; gap: 0; }
+    .step { padding: 36px 0 0 0 !important; border-left: none !important; border-top: 2px solid var(--border); }
+    .step:first-child { border-top: none; }
+  }
+
+  /* ─── Cookies section ───────────────── */
+  .cookies-section { padding:110px 0 130px; background:var(--cream); }
+  .cookies-title {
+    font-family:'Playfair Display',serif; font-style:italic;
+    font-size:clamp(2.4rem,5vw,3.8rem); color:var(--text-900);
+    line-height:1.1; margin-bottom:64px;
+  }
+  .cookies-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:28px;
+  }
+  .empty-state { grid-column:1/-1; text-align:center; padding:80px 20px; }
+  .empty-state p { color:var(--text-400); font-size:1rem; }
+
+  /* ─── Footer ────────────────────────── */
+  .site-footer {
+    background:var(--dark); padding:52px 0 36px; position:relative;
+  }
+  .site-footer::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(106,181,78,.3),transparent);
+  }
+  .footer-inner {
+    display:flex; align-items:center; justify-content:space-between;
+    gap:24px; flex-wrap:wrap;
+  }
+  .footer-logo {
+    display:flex; align-items:center; gap:10px;
+    font-family:'Nunito',sans-serif; font-weight:800;
+    font-size:1rem; color:var(--text-on-dark);
+  }
+  .footer-logo-mark {
+    width:30px; height:30px; border-radius:50%; background:var(--green-mid);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .footer-logo-mark svg { width:14px; height:14px; fill:#fff; }
+  .footer-copy { color:var(--text-muted); font-size:.85rem; }
+  .footer-admin {
+    color:rgba(240,237,230,.2); font-size:.78rem; font-weight:700;
+    transition:color .2s;
+  }
+  .footer-admin:hover { color:rgba(240,237,230,.5); }
   </style>
 </head>
 <body>
 
-  <!-- ── Header ── -->
-  <header class="site-header">
-    <div class="container">
-      <div class="logo">🍃 Cookie Corner</div>
-      <nav class="site-nav">
+  <!-- NAV -->
+  <header class="site-header" id="site-header">
+    <nav class="nav-inner">
+      <a href="/" class="nav-logo">
+        <div class="nav-logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-5 8"/></svg>
+        </div>
+        Cookie Corner
+      </a>
+      <div class="nav-links">
         <a href="#cookies" class="nav-link">Cookies</a>
-        <a href="#how-it-works" class="nav-link">How it works</a>
-      </nav>
-    </div>
+        <a href="#how"     class="nav-link">How it works</a>
+        <a href="#cookies" class="nav-cta">Order now</a>
+        <a href="./admin.html" class="nav-admin-btn" title="Admin Login">
+          <svg viewBox="-42 0 512 512.001" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+            <path d="m210.351562 246.632812c33.882813 0 63.21875-12.152343 87.195313-36.128906 23.96875-23.972656 36.125-53.304687 36.125-87.191406 0-33.875-12.152344-63.210938-36.128906-87.191406-23.976563-23.96875-53.3125-36.121094-87.191407-36.121094-33.886718 0-63.21875 12.152344-87.191406 36.125s-36.128906 53.308594-36.128906 87.1875c0 33.886719 12.15625 63.222656 36.128906 87.195312 23.980469 23.96875 53.316406 36.125 87.191406 36.125zm-65.972656-189.292968c18.394532-18.394532 39.972656-27.335938 65.972656-27.335938 25.996094 0 47.578126 8.941406 65.976563 27.335938 18.394531 18.398437 27.339844 39.980468 27.339844 65.972656 0 26-8.945313 47.578125-27.339844 65.976562-18.398437 18.398438-39.980469 27.339844-65.976563 27.339844-25.992187 0-47.570312-8.945312-65.972656-27.339844-18.398437-18.394531-27.34375-39.976562-27.34375-65.976562 0-25.992188 8.945313-47.574219 27.34375-65.972656zm0 0"/>
+            <path d="m426.128906 393.703125c-.691406-9.976563-2.089844-20.859375-4.148437-32.351563-2.078125-11.578124-4.753907-22.523437-7.957031-32.527343-3.3125-10.339844-7.808594-20.550781-13.375-30.335938-5.769532-10.15625-12.550782-19-20.160157-26.277343-7.957031-7.613282-17.699219-13.734376-28.964843-18.199219-11.226563-4.441407-23.667969-6.691407-36.976563-6.691407-5.226563 0-10.28125 2.144532-20.042969 8.5-6.007812 3.917969-13.035156 8.449219-20.878906 13.460938-6.707031 4.273438-15.792969 8.277344-27.015625 11.902344-10.949219 3.542968-22.066406 5.339844-33.042969 5.339844-10.96875 0-22.085937-1.796876-33.042968-5.339844-11.210938-3.621094-20.300782-7.625-26.996094-11.898438-7.769532-4.964844-14.800782-9.496094-20.898438-13.46875-9.753906-6.355468-14.808594-8.5-20.035156-8.5-13.3125 0-25.75 2.253906-36.972656 6.699219-11.257813 4.457031-21.003906 10.578125-28.96875 18.199219-7.609375 7.28125-14.390625 16.121094-20.15625 26.273437-5.558594 9.785157-10.058594 19.992188-13.371094 30.339844-3.199219 10.003906-5.875 20.945313-7.953125 32.523437-2.0625 11.476563-3.457031 22.363282-4.148437 32.363282-.679688 9.777344-1.023438 19.953125-1.023438 30.234375 0 26.726562 8.496094 48.363281 25.25 64.320312 16.546875 15.746094 38.4375 23.730469 65.066406 23.730469h246.53125c26.621094 0 48.511719-7.984375 65.0625-23.730469 16.757813-15.945312 25.253906-37.589843 25.253906-64.324219-.003906-10.316406-.351562-20.492187-1.035156-30.242187zm-44.90625 72.828125c-10.933594 10.40625-25.449218 15.464844-44.378906 15.464844h-246.527344c-18.933594 0-33.449218-5.058594-44.378906-15.460938-10.722656-10.207031-15.933594-24.140625-15.933594-42.585937 0-9.59375.316406-19.066407.949219-28.160157.617187-8.921874 1.878906-18.722656 3.75-29.136718 1.847656-10.285156 4.199219-19.9375 6.996094-28.675782 2.683593-8.378906 6.34375-16.675781 10.882812-24.667968 4.332031-7.617188 9.316407-14.152344 14.816407-19.417969 5.144531-4.925781 11.628906-8.957031 19.269531-11.980469 7.066406-2.796875 15.007812-4.328125 23.628906-4.558594 1.050781.558594 2.921875 1.625 5.953125 3.601563 6.167969 4.019531 13.277344 8.605469 21.136719 13.625 8.859375 5.648437 20.273437 10.75 33.910156 15.152344 13.941406 4.507812 28.160156 6.796875 42.273437 6.796875 14.113282 0 28.335938-2.289063 42.269532-6.792969 13.648437-4.410156 25.058594-9.507813 33.929687-15.164063 8.042969-5.140624 14.953125-9.59375 21.121094-13.617187 3.03125-1.972656 4.902344-3.042969 5.953125-3.601563 8.625.230469 16.566406 1.761719 23.636719 4.558594 7.636719 3.023438 14.121093 7.058594 19.265625 11.980469 5.5 5.261719 10.484375 11.796875 14.816406 19.421875 4.542969 7.988281 8.207031 16.289062 10.886719 24.660156 2.800781 8.75 5.15625 18.398438 7 28.675782 1.867187 10.433593 3.132812 20.238281 3.75 29.144531v.007812c.636719 9.058594.957031 18.527344.960937 28.148438-.003906 18.449219-5.214844 32.378906-15.9375 42.582031zm0 0"/>
+          </svg>
+        </a>
+      </div>
+    </nav>
   </header>
 
-  <!-- ── Hero ── -->
+  <!-- ═══════════════════════════════════
+       HERO — ART DIRECTION
+  ═══════════════════════════════════ -->
   <section class="hero">
-    <div class="container">
-      <div class="hero-content">
-        <span class="hero-badge">✨ Freshly baked with love</span>
-        <h1>Homemade Cookies,<br><em>Just for You</em></h1>
-        <p>Browse what we're baking, read what friends think, and place your order. We'll take care of the rest.</p>
-        <a href="#cookies" class="btn btn-primary btn-large">See Available Cookies</a>
+
+    <!-- Background word art — "HOMEMADE" behind everything -->
+    <div class="hero-bg-text" aria-hidden="true">
+      <span class="hero-bg-l">HOMEMADE</span>
+    </div>
+
+    <!-- Floating deco cookies -->
+    <div class="deco dc-1"><img src="./assets/images/chocolate-chip-cookie.png" alt=""></div>
+    <div class="deco dc-2"><img src="./assets/images/chocolate-chip-cookie.png" alt=""></div>
+    <div class="deco dc-3"><img src="./assets/images/chocolate-chip-cookie.png" alt=""></div>
+    <div class="deco dc-4"><img src="./assets/images/chocolate-chip-cookie.png" alt=""></div>
+    <div class="deco dc-5"><img src="./assets/images/chocolate-chip-cookie.png" alt=""></div>
+    <div class="deco dc-6"><img src="./assets/images/chocolate-chip-cookie.png" alt=""></div>
+    <div class="deco dc-7"><img src="./assets/images/chocolate-chip-cookie.png" alt=""></div>
+    <div class="deco dc-8"><img src="./assets/images/chocolate-chip-cookie.png" alt=""></div>
+
+    <!-- Main cookie image — z-index 3 -->
+    <img
+      src="./assets/images/chocolate-chip-cookie.png"
+      class="hero-cookie"
+      alt="Freshly baked chocolate chip cookie"
+    >
+
+    <!-- "Cookies" in front of the cookie image — z-index 4 -->
+    <span class="hero-fg-cookies" aria-hidden="true">Cookies</span>
+
+    <!-- Bottom UI -->
+    <div class="hero-bottom">
+      <div class="hero-bottom-left">
+        <span class="hero-small-label">Homemade &middot; For friends</span>
+        <p class="hero-tagline">Crafted with love,<br>ordered in seconds.</p>
       </div>
-      <div class="hero-visual" aria-hidden="true">🍪</div>
+      <a href="#cookies" class="hero-order-btn">
+        Order Now
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M3 8h10M9 4l4 4-4 4"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="hero-scroll" aria-hidden="true">
+      <div class="scroll-line"></div>
+      <span class="scroll-label">Scroll</span>
+    </div>
+
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track">
+      <div class="marquee-item">Freshly Baked <span class="msep">&middot;</span></div>
+      <div class="marquee-item">Order Now <span class="msep">&middot;</span></div>
+      <div class="marquee-item">Made With Love <span class="msep">&middot;</span></div>
+      <div class="marquee-item">Standard &amp; Mini Sizes <span class="msep">&middot;</span></div>
+      <div class="marquee-item">No Account Needed <span class="msep">&middot;</span></div>
+      <div class="marquee-item">For Friends Only <span class="msep">&middot;</span></div>
+      <div class="marquee-item">Freshly Baked <span class="msep">&middot;</span></div>
+      <div class="marquee-item">Order Now <span class="msep">&middot;</span></div>
+      <div class="marquee-item">Made With Love <span class="msep">&middot;</span></div>
+      <div class="marquee-item">Standard &amp; Mini Sizes <span class="msep">&middot;</span></div>
+      <div class="marquee-item">No Account Needed <span class="msep">&middot;</span></div>
+      <div class="marquee-item">For Friends Only <span class="msep">&middot;</span></div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="how">
+    <div class="container">
+      <h2 class="how-title">Baked with love, ordered with ease.</h2>
+      <div class="steps-row">
+        <div class="step">
+          <h3 class="step-name">Browse</h3>
+          <p>See what's fresh this round and check what your friends thought about the last batch.</p>
+        </div>
+        <div class="step">
+          <h3 class="step-name">Order</h3>
+          <p>Name, size, amount. That's literally it. No account, no payment, done in seconds.</p>
+        </div>
+        <div class="step">
+          <h3 class="step-name">Enjoy</h3>
+          <p>We'll hit you up when they're out of the oven. Come grab them warm.</p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- ── How it works ── -->
-  <section class="how-it-works" id="how-it-works">
-    <div class="container">
-      <h2>How it works</h2>
-      <div class="steps">
-        <div class="step">
-          <span class="step-icon">👀</span>
-          <h3>Browse</h3>
-          <p>Check out what we're baking this round and read reviews from other friends.</p>
-        </div>
-        <div class="step">
-          <span class="step-icon">📝</span>
-          <h3>Order</h3>
-          <p>Pick your cookie, choose standard or mini size, and tell us how many you want.</p>
-        </div>
-        <div class="step">
-          <span class="step-icon">🍃</span>
-          <h3>Enjoy</h3>
-          <p>We'll let you know when your batch is ready. Then come get 'em!</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Cookies Section ── -->
+  <!-- COOKIES -->
   <section class="cookies-section" id="cookies">
     <div class="container">
-      <div class="section-header">
-        <div>
-          <h2>Available Now</h2>
-          <p class="section-subtitle">Updated when we decide to bake — check back often!</p>
-        </div>
-      </div>
-
+      <h2 class="cookies-title">Fresh from the oven.</h2>
       <div class="cookies-grid" id="cookies-grid">
         <div class="loading-spinner"></div>
       </div>
-
       <div class="empty-state hidden" id="empty-state">
-        <div class="empty-icon">🌱</div>
-        <p>No cookies listed right now.<br>Check back soon — something's always in the oven!</p>
+        <p>Nothing in the oven right now. Check back soon.</p>
       </div>
     </div>
   </section>
 
-  <!-- ── Footer ── -->
+  <!-- FOOTER -->
   <footer class="site-footer">
-    <div class="container">
-      <span>Made with 💚 and a lot of butter</span>
-      <a href="./admin.html" class="admin-link">Admin</a>
+    <div class="container footer-inner">
+      <div class="footer-logo">
+        <div class="footer-logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-5 8"/></svg>
+        </div>
+        Cookie Corner
+      </div>
+      <span class="footer-copy">Made with love and a whole lot of butter</span>
+      <a href="./admin.html" class="footer-admin">Admin</a>
     </div>
   </footer>
 
-  <!-- ════════════════════════════════════════════
-       ORDER MODAL
-  ═════════════════════════════════════════════ -->
+  <!-- ORDER MODAL -->
   <div class="modal-overlay hidden" id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
     <div class="modal">
-      <button class="modal-close" id="close-order-modal" aria-label="Close">✕</button>
-
-      <!-- Order Form -->
+      <button class="modal-close" id="close-order-modal" aria-label="Close">&#x2715;</button>
       <div id="order-form-view">
         <h2 id="order-modal-title">Place Your Order</h2>
         <form id="order-form" novalidate>
@@ -293,101 +524,78 @@
             <label>Cookie</label>
             <div class="selected-cookie-display" id="selected-cookie-display"></div>
           </div>
-
           <div class="form-group">
             <label for="customer-name">Your Name</label>
             <input type="text" id="customer-name" placeholder="Enter your name" autocomplete="name" required>
           </div>
-
           <div class="form-group">
             <label>Cookie Size</label>
             <div class="size-toggle">
-              <button type="button" class="size-btn active" data-size="standard">
-                🍪 Standard
-                <span>Regular size</span>
-              </button>
-              <button type="button" class="size-btn" data-size="small">
-                🫐 Mini
-                <span>Bite-sized</span>
-              </button>
+              <button type="button" class="size-btn active" data-size="standard">Standard<span>Regular size</span></button>
+              <button type="button" class="size-btn" data-size="small">Mini<span>Bite-sized</span></button>
             </div>
           </div>
-
           <div class="form-group">
             <label for="cookie-amount">How many?</label>
             <div class="amount-input">
-              <button type="button" class="amount-btn" id="decrease-amount" aria-label="Decrease amount">−</button>
-              <input type="number" id="cookie-amount" value="6" min="1" max="999" aria-label="Cookie amount">
-              <button type="button" class="amount-btn" id="increase-amount" aria-label="Increase amount">+</button>
+              <button type="button" class="amount-btn" id="decrease-amount" aria-label="Decrease">&#x2212;</button>
+              <input type="number" id="cookie-amount" value="6" min="1" max="999" aria-label="Amount">
+              <button type="button" class="amount-btn" id="increase-amount" aria-label="Increase">&#x2B;</button>
             </div>
           </div>
-
           <div class="form-group">
-            <label for="order-note">Note <span style="font-weight:300;text-transform:none">(optional)</span></label>
+            <label for="order-note">Note <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
             <textarea id="order-note" placeholder="Any wishes? Allergies? Just say hi?"></textarea>
           </div>
-
-          <button type="submit" class="btn btn-primary btn-full" id="order-submit-btn">
-            Place Order 🍪
-          </button>
+          <button type="submit" class="btn btn-primary btn-full btn-large" id="order-submit-btn">Place Order</button>
         </form>
       </div>
-
-      <!-- Success View -->
       <div id="order-success-view" class="order-success hidden">
-        <div class="success-icon">🎉</div>
+        <div style="font-size:3rem;margin-bottom:14px;color:var(--green-bright)">&#10003;</div>
         <h2>Order placed!</h2>
-        <p>Your cookies are on the list. We'll be in touch when they're ready.</p>
+        <p style="margin-bottom:4px">Your cookies are on the list.</p>
         <div class="order-summary" id="order-summary-details"></div>
-        <button class="btn btn-primary btn-full" id="order-success-close">
-          Sweet! ✨
-        </button>
+        <button class="btn btn-primary btn-full btn-large" id="order-success-close">Sweet!</button>
       </div>
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════════
-       REVIEW MODAL
-  ═════════════════════════════════════════════ -->
+  <!-- REVIEW MODAL -->
   <div class="modal-overlay hidden" id="review-modal" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
     <div class="modal">
-      <button class="modal-close" id="close-review-modal" aria-label="Close">✕</button>
+      <button class="modal-close" id="close-review-modal" aria-label="Close">&#x2715;</button>
       <h2 id="review-modal-title">Leave a Review</h2>
       <p style="margin-bottom:4px;font-size:.9rem">For: <strong id="review-cookie-name"></strong></p>
-
       <form id="review-form" novalidate style="margin-top:20px">
         <div class="form-group">
           <label for="reviewer-name">Your Name</label>
           <input type="text" id="reviewer-name" placeholder="Enter your name" autocomplete="name" required>
         </div>
-
         <div class="form-group">
-          <label>Rating <span id="rating-hint" style="font-weight:300;text-transform:none;color:var(--text-300)"></span></label>
+          <label>Rating <span id="rating-hint" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-400)"></span></label>
           <div class="star-rating" id="star-rating" role="group" aria-label="Rating">
-            <button type="button" class="star" data-value="1" aria-label="1 star">★</button>
-            <button type="button" class="star" data-value="2" aria-label="2 stars">★</button>
-            <button type="button" class="star" data-value="3" aria-label="3 stars">★</button>
-            <button type="button" class="star" data-value="4" aria-label="4 stars">★</button>
-            <button type="button" class="star" data-value="5" aria-label="5 stars">★</button>
+            <button type="button" class="star" data-value="1">&#9733;</button>
+            <button type="button" class="star" data-value="2">&#9733;</button>
+            <button type="button" class="star" data-value="3">&#9733;</button>
+            <button type="button" class="star" data-value="4">&#9733;</button>
+            <button type="button" class="star" data-value="5">&#9733;</button>
           </div>
         </div>
-
         <div class="form-group">
-          <label for="review-comment">Comment <span style="font-weight:300;text-transform:none">(optional)</span></label>
+          <label for="review-comment">Comment <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
           <textarea id="review-comment" placeholder="What did you think? Would you order again?"></textarea>
         </div>
-
-        <button type="submit" class="btn btn-primary btn-full" id="review-submit-btn">
-          Submit Review 💚
-        </button>
+        <button type="submit" class="btn btn-primary btn-full btn-large" id="review-submit-btn">Submit Review</button>
       </form>
     </div>
   </div>
 
-  <!-- Toast container -->
   <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
-  <!-- Scripts -->
+  <script>
+    const _h = document.getElementById('site-header');
+    window.addEventListener('scroll', () => _h.classList.toggle('scrolled', scrollY > 60), { passive: true });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./js/config.js"></script>
   <script src="./js/main.js"></script>

@@ -94,50 +94,28 @@ function renderCookieCard(cookie, reviews) {
          <span class="stars-display">${starsHtml(avg)}</span>
          <span class="rating-count">${count} review${count !== 1 ? 's' : ''}</span>
        </div>`
-    : '<p class="no-reviews">No reviews yet — be the first!</p>';
+    : '<p class="no-reviews">No reviews yet.</p>';
 
-  const reviewItems = reviews.slice(0, 3).map(r => `
-    <div class="review-item">
-      <div class="review-header">
-        <span class="reviewer-name">${esc(r.reviewer_name)}</span>
-        <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
-        <span class="review-date">${fmtDate(r.created_at)}</span>
-      </div>
-      ${r.comment ? `<p class="review-comment">${esc(r.comment)}</p>` : ''}
-    </div>
-  `).join('');
-
-  const moreNote = count > 3 ? `<p style="font-size:.8rem;color:var(--text-300);text-align:center;padding:6px 0 2px">+${count - 3} more review${count - 3 !== 1 ? 's' : ''}</p>` : '';
-
-  const reviewsSection = count > 0 ? `
-    <div class="reviews-section">
-      <button class="reviews-toggle" data-cookie-id="${cookie.id}">
-        <span>Show ${count} review${count !== 1 ? 's' : ''}</span>
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style="transition:.2s"><path d="M6 8L1 3h10z"/></svg>
-      </button>
-      <div class="reviews-list hidden" id="reviews-${cookie.id}">
-        ${reviewItems}
-        ${moreNote}
-      </div>
-    </div>` : '';
+  const initial = esc(cookie.name.charAt(0).toUpperCase());
+  const visual  = cookie.image_url
+    ? `<img src="${esc(cookie.image_url)}" alt="${esc(cookie.name)}" class="cookie-card-img">`
+    : `<span class="cookie-initial">${initial}</span>`;
 
   return `
     <div class="cookie-card" data-id="${cookie.id}">
-      <div class="cookie-card-header">${cookie.emoji || '🍪'}</div>
+      <div class="cookie-card-header">
+        ${visual}
+      </div>
       <div class="cookie-card-body">
         <h3>${esc(cookie.name)}</h3>
         ${cookie.description ? `<p class="cookie-description">${esc(cookie.description)}</p>` : ''}
         ${ratingHtml}
       </div>
       <div class="cookie-card-actions">
-        <button class="btn btn-secondary review-btn"
+        <button class="btn btn-primary btn-full order-btn"
           data-cookie-id="${cookie.id}"
-          data-cookie-name="${esc(cookie.name)}">✏️ Review</button>
-        <button class="btn btn-primary order-btn"
-          data-cookie-id="${cookie.id}"
-          data-cookie-name="${esc(cookie.name)}">🛒 Order</button>
+          data-cookie-name="${esc(cookie.name)}">Order</button>
       </div>
-      ${reviewsSection}
     </div>`;
 }
 
@@ -145,23 +123,6 @@ function attachCardListeners() {
   document.querySelectorAll('.order-btn').forEach(btn =>
     btn.addEventListener('click', () => openOrderModal(btn.dataset.cookieId, btn.dataset.cookieName))
   );
-  document.querySelectorAll('.review-btn').forEach(btn =>
-    btn.addEventListener('click', () => openReviewModal(btn.dataset.cookieId, btn.dataset.cookieName))
-  );
-  document.querySelectorAll('.reviews-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const list    = document.getElementById(`reviews-${btn.dataset.cookieId}`);
-      const open    = !list.classList.contains('hidden');
-      const label   = btn.querySelector('span');
-      const arrow   = btn.querySelector('svg');
-      list.classList.toggle('hidden', open);
-      const count   = btn.closest('.cookie-card').querySelectorAll('.review-item').length;
-      label.textContent = open
-        ? `Show ${count} review${count !== 1 ? 's' : ''}`
-        : `Hide review${count !== 1 ? 's' : ''}`;
-      arrow.style.transform = open ? '' : 'rotate(180deg)';
-    });
-  });
 }
 
 // ── Order Modal ────────────────────────────────────────────

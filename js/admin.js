@@ -227,7 +227,11 @@ async function loadCookiesAdmin() {
 
   grid.innerHTML = cookies.map(c => `
     <div class="manage-card ${c.available ? '' : 'unavailable'}" data-cookie-id="${c.id}">
-      <div class="manage-emoji">${c.emoji || '🍪'}</div>
+      <div class="manage-thumb">
+        ${c.image_url
+          ? `<img src="${esc(c.image_url)}" alt="${esc(c.name)}">`
+          : `<span>${esc(c.name.charAt(0).toUpperCase())}</span>`}
+      </div>
       <div class="manage-info">
         <h4>${esc(c.name)}</h4>
         <p>${c.description ? esc(c.description) : '(no description)'}</p>
@@ -268,20 +272,38 @@ async function toggleCookieAvailability(cookieId, currentlyAvailable) {
 // Add cookie form
 document.getElementById('add-cookie-form').addEventListener('submit', async e => {
   e.preventDefault();
-  const name  = document.getElementById('new-cookie-name').value.trim();
-  const desc  = document.getElementById('new-cookie-desc').value.trim();
-  const emoji = document.getElementById('new-emoji').value.trim() || '🍪';
-  const btn   = document.getElementById('add-cookie-btn');
+  const name = document.getElementById('new-cookie-name').value.trim();
+  const desc = document.getElementById('new-cookie-desc').value.trim();
+  const file = document.getElementById('new-cookie-image').files[0];
+  const btn  = document.getElementById('add-cookie-btn');
 
   if (!name) { showToast('Please enter a cookie name.', 'error'); return; }
 
   btn.disabled    = true;
   btn.textContent = 'Adding…';
 
+  let image_url = null;
+  if (file) {
+    const ext  = file.name.split('.').pop();
+    const path = `${Date.now()}.${ext}`;
+    const { data: up, error: upErr } = await supabaseClient.storage
+      .from('cookie-images')
+      .upload(path, file, { upsert: true });
+    if (upErr) {
+      showToast('Image upload failed. Try again.', 'error');
+      btn.disabled = false; btn.textContent = 'Add Cookie';
+      return;
+    }
+    const { data: { publicUrl } } = supabaseClient.storage
+      .from('cookie-images')
+      .getPublicUrl(up.path);
+    image_url = publicUrl;
+  }
+
   const { error } = await supabaseClient.from('cookies').insert({
     name,
     description: desc || null,
-    emoji,
+    image_url,
     available: true,
   });
 
@@ -291,8 +313,22 @@ document.getElementById('add-cookie-form').addEventListener('submit', async e =>
   if (error) { showToast('Could not add cookie. Try again.', 'error'); return; }
 
   document.getElementById('add-cookie-form').reset();
+  document.getElementById('new-image-preview').style.display = 'none';
   showToast(`"${name}" added!`, 'success');
   await loadCookiesAdmin();
+});
+
+// Image preview
+document.getElementById('new-cookie-image').addEventListener('change', e => {
+  const file    = e.target.files[0];
+  const preview = document.getElementById('new-image-preview');
+  const img     = document.getElementById('new-image-preview-img');
+  if (file) {
+    img.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
 });
 
 // ── Delete confirmation modal ──────────────────────────────
