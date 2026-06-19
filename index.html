@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookie Corner 🍪</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    /* ── Page-specific styles ── */
+
+    /* Header */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(243, 239, 230, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1.5px solid var(--border);
+    }
+    .site-header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--green-700);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .site-nav { display: flex; align-items: center; gap: 6px; }
+    .nav-link {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-500);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+    }
+    .nav-link:hover { background: var(--green-50); color: var(--green-700); }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #2c5e1a 60%, #3d7a27 100%);
+      color: var(--white);
+      padding: 80px 0 90px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 10% 80%, rgba(141, 196, 122, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 90% 20%, rgba(106, 171, 82, 0.12) 0%, transparent 50%);
+    }
+    .hero .container {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(141, 196, 122, 0.22);
+      border: 1px solid rgba(141, 196, 122, 0.4);
+      color: var(--green-200);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .hero h1 { color: var(--white); margin-bottom: 16px; }
+    .hero p  { color: rgba(255,255,255,0.75); font-size: 1.1rem; margin-bottom: 32px; max-width: 480px; }
+    .hero-visual {
+      font-size: 7rem;
+      line-height: 1;
+      filter: drop-shadow(0 4px 24px rgba(0,0,0,0.3));
+      animation: float 4s ease-in-out infinite;
+      user-select: none;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+    @media (max-width: 640px) {
+      .hero .container { grid-template-columns: 1fr; }
+      .hero-visual { display: none; }
+    }
+
+    /* How it works */
+    .how-it-works { padding: 64px 0; background: var(--bg-card); }
+    .how-it-works h2 { text-align: center; margin-bottom: 48px; }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px;
+      text-align: center;
+    }
+    .step-icon {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .step h3 { margin-bottom: 6px; color: var(--green-700); }
+    .step p  { font-size: 0.9rem; }
+
+    /* Divider */
+    .leaf-divider {
+      text-align: center;
+      color: var(--green-300);
+      font-size: 1.3rem;
+      letter-spacing: 10px;
+      margin: 4px 0;
+    }
+
+    /* Cookies section */
+    .cookies-section { padding: 64px 0 80px; }
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .section-header h2 { margin: 0; }
+    .section-subtitle { color: var(--text-300); font-size: 0.88rem; }
+
+    .cookies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 26px;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-300);
+    }
+    .empty-state p { font-size: 1.1rem; }
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+
+    /* Footer */
+    .site-footer {
+      background: var(--bg-dark);
+      color: rgba(255,255,255,0.55);
+      padding: 28px 0;
+      text-align: center;
+      font-size: 0.88rem;
+    }
+    .site-footer .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+    .admin-link {
+      color: rgba(255,255,255,0.35);
+      font-size: 0.78rem;
+      transition: var(--transition);
+    }
+    .admin-link:hover { color: rgba(255,255,255,0.65); }
+
+    /* Order confirmation overlay */
+    .order-success {
+      text-align: center;
+      padding: 8px 0 4px;
+    }
+    .order-success .success-icon { font-size: 3.5rem; margin-bottom: 12px; }
+    .order-success h2 { color: var(--green-700); margin-bottom: 10px; }
+    .order-success .order-summary {
+      background: var(--green-50);
+      border: 1.5px solid var(--green-200);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin: 20px 0;
+      text-align: left;
+    }
+    .order-summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      padding: 4px 0;
+    }
+    .order-summary-row span:first-child { color: var(--text-300); }
+    .order-summary-row span:last-child  { font-weight: 700; color: var(--text-700); }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="site-header">
+    <div class="container">
+      <div class="logo">🍃 Cookie Corner</div>
+      <nav class="site-nav">
+        <a href="#cookies" class="nav-link">Cookies</a>
+        <a href="#how-it-works" class="nav-link">How it works</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-badge">✨ Freshly baked with love</span>
+        <h1>Homemade Cookies,<br><em>Just for You</em></h1>
+        <p>Browse what we're baking, read what friends think, and place your order. We'll take care of the rest.</p>
+        <a href="#cookies" class="btn btn-primary btn-large">See Available Cookies</a>
+      </div>
+      <div class="hero-visual" aria-hidden="true">🍪</div>
+    </div>
+  </section>
+
+  <!-- ── How it works ── -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="container">
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-icon">👀</span>
+          <h3>Browse</h3>
+          <p>Check out what we're baking this round and read reviews from other friends.</p>
+        </div>
+        <div class="step">
+          <span class="step-icon">📝</span>
+          <h3>Order</h3>
+          <p>Pick your cookie, choose standard or mini size, and tell us how many you want.</p>
+        </div>
+        <div class="step">
+          <span class="step-icon">🍃</span>
+          <h3>Enjoy</h3>
+          <p>We'll let you know when your batch is ready. Then come get 'em!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Cookies Section ── -->
+  <section class="cookies-section" id="cookies">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2>Available Now</h2>
+          <p class="section-subtitle">Updated when we decide to bake — check back often!</p>
+        </div>
+      </div>
+
+      <div class="cookies-grid" id="cookies-grid">
+        <div class="loading-spinner"></div>
+      </div>
+
+      <div class="empty-state hidden" id="empty-state">
+        <div class="empty-icon">🌱</div>
+        <p>No cookies listed right now.<br>Check back soon — something's always in the oven!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="site-footer">
+    <div class="container">
+      <span>Made with 💚 and a lot of butter</span>
+      <a href="./admin.html" class="admin-link">Admin</a>
+    </div>
+  </footer>
+
+  <!-- ════════════════════════════════════════════
+       ORDER MODAL
+  ═════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+    <div class="modal">
+      <button class="modal-close" id="close-order-modal" aria-label="Close">✕</button>
+
+      <!-- Order Form -->
+      <div id="order-form-view">
+        <h2 id="order-modal-title">Place Your Order</h2>
+        <form id="order-form" novalidate>
+          <div class="form-group">
+            <label>Cookie</label>
+            <div class="selected-cookie-display" id="selected-cookie-display"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="customer-name">Your Name</label>
+            <input type="text" id="customer-name" placeholder="Enter your name" autocomplete="name" required>
+          </div>
+
+          <div class="form-group">
+            <label>Cookie Size</label>
+            <div class="size-toggle">
+              <button type="button" class="size-btn active" data-size="standard">
+                🍪 Standard
+                <span>Regular size</span>
+              </button>
+              <button type="button" class="size-btn" data-size="small">
+                🫐 Mini
+                <span>Bite-sized</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cookie-amount">How many?</label>
+            <div class="amount-input">
+              <button type="button" class="amount-btn" id="decrease-amount" aria-label="Decrease amount">−</button>
+              <input type="number" id="cookie-amount" value="6" min="1" max="999" aria-label="Cookie amount">
+              <button type="button" class="amount-btn" id="increase-amount" aria-label="Increase amount">+</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="order-note">Note <span style="font-weight:300;text-transform:none">(optional)</span></label>
+            <textarea id="order-note" placeholder="Any wishes? Allergies? Just say hi?"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full" id="order-submit-btn">
+            Place Order 🍪
+          </button>
+        </form>
+      </div>
+
+      <!-- Success View -->
+      <div id="order-success-view" class="order-success hidden">
+        <div class="success-icon">🎉</div>
+        <h2>Order placed!</h2>
+        <p>Your cookies are on the list. We'll be in touch when they're ready.</p>
+        <div class="order-summary" id="order-summary-details"></div>
+        <button class="btn btn-primary btn-full" id="order-success-close">
+          Sweet! ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       REVIEW MODAL
+  ═════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="review-modal" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
+    <div class="modal">
+      <button class="modal-close" id="close-review-modal" aria-label="Close">✕</button>
+      <h2 id="review-modal-title">Leave a Review</h2>
+      <p style="margin-bottom:4px;font-size:.9rem">For: <strong id="review-cookie-name"></strong></p>
+
+      <form id="review-form" novalidate style="margin-top:20px">
+        <div class="form-group">
+          <label for="reviewer-name">Your Name</label>
+          <input type="text" id="reviewer-name" placeholder="Enter your name" autocomplete="name" required>
+        </div>
+
+        <div class="form-group">
+          <label>Rating <span id="rating-hint" style="font-weight:300;text-transform:none;color:var(--text-300)"></span></label>
+          <div class="star-rating" id="star-rating" role="group" aria-label="Rating">
+            <button type="button" class="star" data-value="1" aria-label="1 star">★</button>
+            <button type="button" class="star" data-value="2" aria-label="2 stars">★</button>
+            <button type="button" class="star" data-value="3" aria-label="3 stars">★</button>
+            <button type="button" class="star" data-value="4" aria-label="4 stars">★</button>
+            <button type="button" class="star" data-value="5" aria-label="5 stars">★</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="review-comment">Comment <span style="font-weight:300;text-transform:none">(optional)</span></label>
+          <textarea id="review-comment" placeholder="What did you think? Would you order again?"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" id="review-submit-btn">
+          Submit Review 💚
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./js/config.js"></script>
+  <script src="./js/main.js"></script>
+</body>
+</html>

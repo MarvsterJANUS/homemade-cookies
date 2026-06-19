@@ -1,0 +1,340 @@
+/* ============================================================
+   COOKIE CORNER — Customer Page Logic
+   ============================================================ */
+
+// ── State ──────────────────────────────────────────────────
+let selectedCookieId   = null;
+let selectedCookieName = '';
+let selectedSize       = 'standard';
+let selectedRating     = 0;
+
+const RATING_LABELS = ['', 'Terrible 😬', 'Not great 😕', 'Pretty good 🙂', 'Loved it 😍', 'Life-changing 🤩'];
+
+// ── Init ───────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', loadCookies);
+
+// ── Load & Render Cookies ──────────────────────────────────
+async function loadCookies() {
+  const grid       = document.getElementById('cookies-grid');
+  const emptyState = document.getElementById('empty-state');
+
+  grid.innerHTML = '<div class="loading-spinner"></div>';
+  emptyState.classList.add('hidden');
+
+  const { data: cookies, error } = await supabase
+    .from('cookies')
+    .select('*')
+    .eq('available', true)
+    .order('name');
+
+  if (error) {
+    grid.innerHTML = '';
+    showToast('Could not load cookies. Please check your connection.', 'error');
+    return;
+  }
+
+  if (!cookies || cookies.length === 0) {
+    grid.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
+  }
+
+  // Fetch all reviews for the visible cookies in one query
+  const cookieIds = cookies.map(c => c.id);
+  const { data: reviews } = await supabase
+    .from('reviews')
+    .select('*')
+    .in('cookie_id', cookieIds)
+    .order('created_at', { ascending: false });
+
+  // Group reviews by cookie_id
+  const byId = {};
+  cookieIds.forEach(id => { byId[id] = []; });
+  (reviews || []).forEach(r => { if (byId[r.cookie_id]) byId[r.cookie_id].push(r); });
+
+  grid.innerHTML = cookies.map(c => renderCookieCard(c, byId[c.id])).join('');
+  attachCardListeners();
+}
+
+function renderCookieCard(cookie, reviews) {
+  const count = reviews.length;
+  const avg   = count > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / count : 0;
+
+  const ratingHtml = count > 0
+    ? `<div class="rating-display">
+         <span class="stars-display">${starsHtml(avg)}</span>
+         <span class="rating-count">${count} review${count !== 1 ? 's' : ''}</span>
+       </div>`
+    : '<p class="no-reviews">No reviews yet — be the first!</p>';
+
+  const reviewItems = reviews.slice(0, 3).map(r => `
+    <div class="review-item">
+      <div class="review-header">
+        <span class="reviewer-name">${esc(r.reviewer_name)}</span>
+        <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+        <span class="review-date">${fmtDate(r.created_at)}</span>
+      </div>
+      ${r.comment ? `<p class="review-comment">${esc(r.comment)}</p>` : ''}
+    </div>
+  `).join('');
+
+  const moreNote = count > 3 ? `<p style="font-size:.8rem;color:var(--text-300);text-align:center;padding:6px 0 2px">+${count - 3} more review${count - 3 !== 1 ? 's' : ''}</p>` : '';
+
+  const reviewsSection = count > 0 ? `
+    <div class="reviews-section">
+      <button class="reviews-toggle" data-cookie-id="${cookie.id}">
+        <span>Show ${count} review${count !== 1 ? 's' : ''}</span>
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" style="transition:.2s"><path d="M6 8L1 3h10z"/></svg>
+      </button>
+      <div class="reviews-list hidden" id="reviews-${cookie.id}">
+        ${reviewItems}
+        ${moreNote}
+      </div>
+    </div>` : '';
+
+  return `
+    <div class="cookie-card" data-id="${cookie.id}">
+      <div class="cookie-card-header">${cookie.emoji || '🍪'}</div>
+      <div class="cookie-card-body">
+        <h3>${esc(cookie.name)}</h3>
+        ${cookie.description ? `<p class="cookie-description">${esc(cookie.description)}</p>` : ''}
+        ${ratingHtml}
+      </div>
+      <div class="cookie-card-actions">
+        <button class="btn btn-secondary review-btn"
+          data-cookie-id="${cookie.id}"
+          data-cookie-name="${esc(cookie.name)}">✏️ Review</button>
+        <button class="btn btn-primary order-btn"
+          data-cookie-id="${cookie.id}"
+          data-cookie-name="${esc(cookie.name)}">🛒 Order</button>
+      </div>
+      ${reviewsSection}
+    </div>`;
+}
+
+function attachCardListeners() {
+  document.querySelectorAll('.order-btn').forEach(btn =>
+    btn.addEventListener('click', () => openOrderModal(btn.dataset.cookieId, btn.dataset.cookieName))
+  );
+  document.querySelectorAll('.review-btn').forEach(btn =>
+    btn.addEventListener('click', () => openReviewModal(btn.dataset.cookieId, btn.dataset.cookieName))
+  );
+  document.querySelectorAll('.reviews-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const list    = document.getElementById(`reviews-${btn.dataset.cookieId}`);
+      const open    = !list.classList.contains('hidden');
+      const label   = btn.querySelector('span');
+      const arrow   = btn.querySelector('svg');
+      list.classList.toggle('hidden', open);
+      const count   = btn.closest('.cookie-card').querySelectorAll('.review-item').length;
+      label.textContent = open
+        ? `Show ${count} review${count !== 1 ? 's' : ''}`
+        : `Hide review${count !== 1 ? 's' : ''}`;
+      arrow.style.transform = open ? '' : 'rotate(180deg)';
+    });
+  });
+}
+
+// ── Order Modal ────────────────────────────────────────────
+function openOrderModal(cookieId, cookieName) {
+  selectedCookieId   = cookieId;
+  selectedCookieName = cookieName;
+
+  document.getElementById('selected-cookie-display').textContent = cookieName;
+  document.getElementById('order-form-view').classList.remove('hidden');
+  document.getElementById('order-success-view').classList.add('hidden');
+  document.getElementById('order-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  // Reset form state
+  document.getElementById('order-form').reset();
+  document.getElementById('cookie-amount').value = 6;
+  selectedSize = 'standard';
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b.dataset.size === 'standard'));
+}
+
+function closeOrderModal() {
+  document.getElementById('order-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('close-order-modal').addEventListener('click', closeOrderModal);
+document.getElementById('order-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('order-modal')) closeOrderModal();
+});
+document.getElementById('order-success-close').addEventListener('click', closeOrderModal);
+
+// Size toggle
+document.querySelectorAll('.size-btn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    selectedSize = btn.dataset.size;
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.toggle('active', b === btn));
+  })
+);
+
+// Amount stepper
+document.getElementById('decrease-amount').addEventListener('click', () => {
+  const el = document.getElementById('cookie-amount');
+  el.value = Math.max(1, parseInt(el.value || 1) - 1);
+});
+document.getElementById('increase-amount').addEventListener('click', () => {
+  const el = document.getElementById('cookie-amount');
+  el.value = parseInt(el.value || 0) + 1;
+});
+
+// Order form submit
+document.getElementById('order-form').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const name   = document.getElementById('customer-name').value.trim();
+  const amount = parseInt(document.getElementById('cookie-amount').value);
+  const note   = document.getElementById('order-note').value.trim();
+  const btn    = document.getElementById('order-submit-btn');
+
+  if (!name)     { showToast('Please enter your name 🙂', 'error'); return; }
+  if (amount < 1) { showToast('Please enter a valid amount', 'error'); return; }
+
+  btn.disabled    = true;
+  btn.textContent = 'Placing order…';
+
+  const { error } = await supabase.from('orders').insert({
+    customer_name: name,
+    cookie_id:     selectedCookieId,
+    cookie_name:   selectedCookieName,
+    size:          selectedSize,
+    amount:        amount,
+    note:          note || null,
+    status:        'pending',
+  });
+
+  btn.disabled    = false;
+  btn.textContent = 'Place Order 🍪';
+
+  if (error) {
+    showToast('Could not place order. Please try again.', 'error');
+    return;
+  }
+
+  // Show success view
+  document.getElementById('order-form-view').classList.add('hidden');
+  const summary = document.getElementById('order-summary-details');
+  summary.innerHTML = [
+    ['Cookie',  selectedCookieName],
+    ['Size',    selectedSize === 'small' ? 'Mini 🫐' : 'Standard 🍪'],
+    ['Amount',  `${amount} piece${amount !== 1 ? 's' : ''}`],
+    ['Name',    name],
+    note ? ['Note', note] : null,
+  ].filter(Boolean).map(([k, v]) =>
+    `<div class="order-summary-row"><span>${k}</span><span>${esc(v)}</span></div>`
+  ).join('');
+  document.getElementById('order-success-view').classList.remove('hidden');
+});
+
+// ── Review Modal ───────────────────────────────────────────
+function openReviewModal(cookieId, cookieName) {
+  selectedCookieId   = cookieId;
+  selectedCookieName = cookieName;
+  selectedRating     = 0;
+
+  document.getElementById('review-cookie-name').textContent = cookieName;
+  document.getElementById('review-form').reset();
+  updateStars();
+  document.getElementById('review-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReviewModal() {
+  document.getElementById('review-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('close-review-modal').addEventListener('click', closeReviewModal);
+document.getElementById('review-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('review-modal')) closeReviewModal();
+});
+
+// Star interactions
+document.querySelectorAll('.star').forEach(star => {
+  star.addEventListener('click', () => {
+    selectedRating = parseInt(star.dataset.value);
+    updateStars();
+    document.getElementById('rating-hint').textContent = `— ${RATING_LABELS[selectedRating]}`;
+  });
+  star.addEventListener('mouseenter', () => {
+    const v = parseInt(star.dataset.value);
+    document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('hovered', i < v));
+  });
+  star.addEventListener('mouseleave', () => {
+    document.querySelectorAll('.star').forEach(s => s.classList.remove('hovered'));
+  });
+});
+
+function updateStars() {
+  document.querySelectorAll('.star').forEach((s, i) =>
+    s.classList.toggle('active', i < selectedRating)
+  );
+}
+
+// Review form submit
+document.getElementById('review-form').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const name    = document.getElementById('reviewer-name').value.trim();
+  const comment = document.getElementById('review-comment').value.trim();
+  const btn     = document.getElementById('review-submit-btn');
+
+  if (!name)          { showToast('Please enter your name 🙂', 'error'); return; }
+  if (!selectedRating){ showToast('Please select a rating ⭐', 'error'); return; }
+
+  btn.disabled    = true;
+  btn.textContent = 'Submitting…';
+
+  const { error } = await supabase.from('reviews').insert({
+    cookie_id:      selectedCookieId,
+    reviewer_name:  name,
+    rating:         selectedRating,
+    comment:        comment || null,
+  });
+
+  btn.disabled    = false;
+  btn.textContent = 'Submit Review 💚';
+
+  if (error) {
+    showToast('Could not submit review. Please try again.', 'error');
+    return;
+  }
+
+  closeReviewModal();
+  showToast('Review submitted! Thank you 💚', 'success');
+  await loadCookies();
+});
+
+// ── Helpers ────────────────────────────────────────────────
+function starsHtml(avg) {
+  const filled = Math.round(avg);
+  return '★'.repeat(filled) + '☆'.repeat(5 - filled);
+}
+
+function fmtDate(iso) {
+  return new Date(iso).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function esc(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(String(str)));
+  return d.innerHTML;
+}
+
+function showToast(msg, type = 'info', duration = 3500) {
+  const c     = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className   = `toast toast-${type}`;
+  toast.textContent = msg;
+  c.appendChild(toast);
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('toast-visible')));
+  setTimeout(() => {
+    toast.classList.remove('toast-visible');
+    setTimeout(() => toast.remove(), 320);
+  }, duration);
+}
